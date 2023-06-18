@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 use App\Models\User;
+use App\Models\Customer;
+use App\Models\Order;
+use App\Models\Orderdetail;
 
+use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 
 class IndexComponent extends Component
@@ -188,6 +192,28 @@ class IndexComponent extends Component
             ['score' => 82, 'team' => 'H'],
         ]);
     }
+
+    public function ordersList(){
+        
+        $customer_spent_most = DB::table('customers')
+            ->join('orders', 'orders.customerNumber', '=', 'customers.customerNumber')
+            ->join('orderdetails', 'orderdetails.orderNumber', '=', 'orders.orderNumber')
+            ->select('customers.customerNumber', 'customers.customerName', DB::raw('SUM(orderdetails.quantityOrdered * orderdetails.priceEach) as total_spent'))
+            ->groupBy('customers.customerNumber')
+            ->orderByDesc('total_spent')
+            ->first();
+
+            $customer_with_most_orders = DB::table('customers')
+            ->join('orders', 'orders.customerNumber', '=', 'customers.customerNumber')
+            ->select('customers.customerNumber', 'customers.customerName', DB::raw('COUNT(orders.orderNumber) as order_count'))
+            ->groupBy('customers.customerNumber')
+            ->orderByDesc('order_count')
+            ->first();
+
+        $data = new collection(['spent_most' => $customer_spent_most->customerName ,'most_orders'=> $customer_with_most_orders->customerName]);
+
+        return $data;
+    }
     public function render()
     {
         // $employees = $this->getEmployees();
@@ -200,6 +226,7 @@ class IndexComponent extends Component
             'user_id' => $this->user_id,
             'employeeName' => $this->getMostSales(),
             'ranks' => $this->ranks(),
+            'orders' => $this->ordersList()
             ])->layout('livewire.layouts.base');
     }
 }

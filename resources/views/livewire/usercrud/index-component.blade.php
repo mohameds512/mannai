@@ -122,7 +122,7 @@ style="display: {{ $uploadImg ? 'block' : 'none' }}" >
     <strong> the employee who made
         the most valuable sale is {{ $employeeName }}</strong>
 </div>
-{{$ranks}}
+
 <div>
     <table>
         <thead>
@@ -143,5 +143,6 @@ style="display: {{ $uploadImg ? 'block' : 'none' }}" >
         </tbody>
     </table>
 </div>
+{{$orders}}
 </div>
 
